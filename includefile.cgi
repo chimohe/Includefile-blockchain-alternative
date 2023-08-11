@@ -26,37 +26,4 @@ sub includefile {
         my $signature = $private_key->sign_string($item, 'SHA-256');
 
         # PoW: Find the correct nonce value
-        my $data_with_nonce = "$item:$signature:$nonce";
-        my $hash            = sha256_hex($data_with_nonce);
-        while (substr($hash, 0, $target_zeros) ne "0" x $target_zeros) {
-            $nonce++;
-            $data_with_nonce = "$item:$signature:$nonce";
-            $hash            = sha256_hex($data_with_nonce);
-        }
-
-        print INCLUDE "$data_with_nonce\n";
-    }
-
-    # Close the file
-    close(INCLUDE);
-
-    return 1;    # Indicate success
-}
-
-# Example usage with multiple arrays
-my @arrays_to_append = (
-    ["Block 1 data", "Block 2 data", "Block 3 data"],
-    ["Block A data", "Block B data", "Block C data"],
-    ["Block X data", "Block Y data", "Block Z data"]
-);
-
-for my $i (0 .. $#arrays_to_append) {
-    my $filename = "blockchain$i.txt"; # Replace with desired filenames
-    my $result = includefile($filename, @{$arrays_to_append[$i]});
-    
-    if ($result) {
-        print "Data successfully added to $filename.\n";
-    } else {
-        print "Error adding data to $filename.\n";
-    }
-}
+        my $data
