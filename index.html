@@ -3,13 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blockchain Interface</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Blockchain Data Entry</title>
 </head>
 <body>
-    <h1>Blockchain Interface</h1>
-    <button id="addDataBtn">Add Data to Blockchain</button>
-    <div id="output"></div>
-    <script src="script.js"></script>
+    <h1>Blockchain Data Entry</h1>
+    <form action="process_form.php" method="post" enctype="multipart/form-data">
+        <h2>Block 1</h2>
+        <textarea name="block1_data" rows="4" cols="50" placeholder="Enter Block 1 data"></textarea>
+        <br>
+        <h2>Block 2</h2>
+        <textarea name="block2_data" rows="4" cols="50" placeholder="Enter Block 2 data"></textarea>
+        <br>
+        <h2>Block 3</h2>
+        <textarea name="block3_data" rows="4" cols="50" placeholder="Enter Block 3 data"></textarea>
+        <br>
+        <input type="file" name="file_block1">
+        <input type="file" name="file_block2">
+        <input type="file" name="file_block3">
+        <br>
+        <input type="submit" value="Submit">
+    </form>
 </body>
 </html>
