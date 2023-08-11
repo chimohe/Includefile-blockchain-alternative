@@ -36,4 +36,6 @@ This project provides a simple web interface to interact with a Perl script that
 - The JavaScript code assumes the availability of a server-side script and proper response handling.
 - This project serves as a basic demonstration and should be extended for production use.
 
+- n this version of the code, an array of arrays @arrays_to_append is used. The loop iterates through each subarray and appends its contents to a separate file named “blockchain0.txt”, “blockchain1.txt”, and so on. You can adjust the loop and filenames according to your needs.
+
 Feel free to adapt, modify, and enhance the code to suit your needs.
