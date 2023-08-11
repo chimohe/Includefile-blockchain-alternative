@@ -1,71 +1,62 @@
 use strict;
 use warnings;
-use Crypt::OpenSSL::RSA;
-use Crypt::PRNG qw(random_bytes);
-use Digest::SHA qw(sha256_hex);
-use Crypt::SaltedHash;
-
-# Constants
-my $KEY_SIZE = 4096;            # Increased key size for stronger security
-my $TARGET_ZEROS = 6;           # Increased proof-of-work difficulty
+use Crypt::Digest::SHA256 qw(sha256_hex);
+use Crypt::RSA;
+use Crypt::RSA::Key;
 
 sub includefile {
-    my ($fname, @array) = @_;
+    my ($fname, @data_array) = @_;
 
-    die "Invalid filename: $fname" unless $fname =~ /^[A-Za-z0-9_\-\.]+$/;
+    # Remove potentially harmful characters from the file name
+    $fname =~ s/([\&;\`'\|\"*\?\~\^\(\)\[\]\{\}\$\n\r])//g;
 
-    my $rsa = Crypt::OpenSSL::RSA->generate_key($KEY_SIZE);
-    my $private_key = $rsa->get_private_key_string();
-    my $public_key = $rsa->get_public_key_string();
-
-    my $nonce = generate_nonce();
-
-    open my $fh, '>>', $fname or die "Cannot open $fname: $!";
-
-    foreach my $item (@array) {
-        validate_data($item);
-
-        my $signature = $rsa->sign($item, 'SHA-256');
-
-        my $data_with_nonce = "$item:$signature:$nonce";
-        my $hash = sha256_hex($data_with_nonce);
-
-        while (substr($hash, 0, $TARGET_ZEROS) ne "0" x $TARGET_ZEROS) {
-            $nonce = generate_nonce();
-            $data_with_nonce = "$item:$signature:$nonce";
-            $hash = sha256_hex($data_with_nonce);
-        }
-
-        print $fh "$data_with_nonce\n";
+    # Open the file for appending
+    if (!open(INCLUDE, '>>', $fname)) {
+        return '[an error occurred while processing this directive]';
     }
 
-    close($fh);
+    # Generate a private key for signing
+    my $private_key = Crypt::RSA::Key::Private->generate(Size => 1024);
+    my $public_key  = $private_key->public_key();
 
-    return 1;
+    # Append the @_array data, signatures, and proof-of-work to the file
+    my $target_zeros = 4;    # The required number of leading zeros in the hash
+    my $nonce        = 0;
+    foreach my $item (@data_array) {
+        my $signature = $private_key->sign_string($item, 'SHA-256');
+
+        # PoW: Find the correct nonce value
+        my $data_with_nonce = "$item:$signature:$nonce";
+        my $hash            = sha256_hex($data_with_nonce);
+        while (substr($hash, 0, $target_zeros) ne "0" x $target_zeros) {
+            $nonce++;
+            $data_with_nonce = "$item:$signature:$nonce";
+            $hash            = sha256_hex($data_with_nonce);
+        }
+
+        print INCLUDE "$data_with_nonce\n";
+    }
+
+    # Close the file
+    close(INCLUDE);
+
+    return 1;    # Indicate success
 }
 
-sub validate_data {
-    my ($data) = @_;
-    die "Invalid data" unless defined $data && length($data) > 0;
-}
+# Example usage with multiple arrays
+my @arrays_to_append = (
+    ["Block 1 data", "Block 2 data", "Block 3 data"],
+    ["Block A data", "Block B data", "Block C data"],
+    ["Block X data", "Block Y data", "Block Z data"]
+);
 
-sub generate_nonce {
-    return unpack("L", random_bytes(4));  # Using Crypt::PRNG for better security
-}
-
-sub generate_salted_hash {
-    my ($data) = @_;
-    my $csh = Crypt::SaltedHash->new(algorithm => 'SHA-512');
-    $csh->add($data);
-    return $csh->generate;
-}
-
-my $filename = "blockchain.txt";
-my @data_to_append = ("Block 1 data", "Block 2 data", "Block 3 data");
-
-my $result = includefile($filename, @data_to_append);
-if ($result) {
-    print "Data successfully added to the blockchain file.\n";
-} else {
-    print "Error adding data to the blockchain file.\n";
+for my $i (0 .. $#arrays_to_append) {
+    my $filename = "blockchain$i.txt"; # Replace with desired filenames
+    my $result = includefile($filename, @{$arrays_to_append[$i]});
+    
+    if ($result) {
+        print "Data successfully added to $filename.\n";
+    } else {
+        print "Error adding data to $filename.\n";
+    }
 }
