@@ -1,7 +1,7 @@
 # Includefile-blockchain-alternative
 Includefile blockchain alternative 
 
-written by chatgpt 3.5
+written by chatgpt 3.5 guided by Timothy Dean Firman
 
 Certainly, here's a README summary
 
