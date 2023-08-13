@@ -23,5 +23,23 @@
         <br>
         <input type="submit" value="Submit">
     </form>
+    <p>
+    <div class="container">
+        <h1>Blockchain Viewer</h1>
+        <?php
+        for ($i = 0; $i < 3; $i++) {
+            $filename = "blockchain$i.txt";
+            if (file_exists($filename)) {
+                $contents = file_get_contents($filename);
+                echo "<h2>Contents of $filename:</h2>";
+                echo "<pre>$contents</pre>";
+            } else {
+                echo "<p>$filename not found.</p>";
+            }
+        }
+        ?>
+    </div>
+    </p>
+    
 </body>
 </html>
